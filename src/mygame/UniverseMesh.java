@@ -70,7 +70,7 @@ public class UniverseMesh {
     }
     
     private float getDistance(double redshift){
-        float d = (float) (redshift * c / hubbleConst) * 10;
+        float d = (float) (redshift * c / hubbleConst);
         return d;
     }
     

@@ -45,7 +45,6 @@ public class IntroLoadingScreen extends AbstractAppState {
         stateManager = app.getStateManager();
         flyCam = app.getFlyByCamera();
         theApp = app;
-        
     }
     
     @Override
@@ -77,7 +76,6 @@ public class IntroLoadingScreen extends AbstractAppState {
         niftyDisplay.cleanup();
         nifty.exit();
         flyCam.setDragToRotate(false);
-        guiViewPort.clearScenes();
         guiViewPort.detachScene(localRootNode);
         guiViewPort.removeProcessor(niftyDisplay);
         

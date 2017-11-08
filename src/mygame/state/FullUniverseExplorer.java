@@ -10,6 +10,11 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
+import com.jme3.audio.AudioRenderer;
+import com.jme3.font.BitmapFont;
+import com.jme3.font.BitmapFont.Align;
+import com.jme3.font.BitmapText;
+import com.jme3.font.Rectangle;
 import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
 import com.jme3.scene.Node;
@@ -19,14 +24,17 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.Camera;
-import com.jme3.scene.VertexBuffer;
-import com.jme3.util.BufferUtils;
+import com.jme3.renderer.ViewPort;
+import de.lessvoid.nifty.Nifty;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.FloatBuffer;
+import static java.lang.Math.round;
+import static java.lang.Math.sqrt;
+import java.math.BigDecimal;
 
 /**
  *
@@ -43,12 +51,21 @@ public class FullUniverseExplorer extends AbstractAppState {
     private UniverseMesh galaxyUniverse;
 //    private UniverseMesh starUniverse;
     private final AppStateManager stateManagerFromApp;
+    private final Node guiNode;
+    private NiftyJmeDisplay niftyDisplay;
+    private final AudioRenderer audioRenderer;
+    private final ViewPort guiViewPort;
+    private Nifty nifty;
+    private BitmapText hudText;
     
     public FullUniverseExplorer (SimpleApplication app){
         rootNode = app.getRootNode();
         assetManager = app.getAssetManager();
         flyCam = app.getFlyByCamera();
+        guiNode = app.getGuiNode();
         cam = app.getCamera();
+        audioRenderer = app.getAudioRenderer();
+        guiViewPort = app.getGuiViewPort();
         inputManager = app.getInputManager();
         stateManagerFromApp = app.getStateManager();
     }
@@ -61,11 +78,13 @@ public class FullUniverseExplorer extends AbstractAppState {
         
         readData();
         flyCam.setMoveSpeed(5000);
-        cam.setFrustumFar(50000);
+        cam.setFrustumFar(500000);
         cam.onFrameChange();
         initKeys();
         stateManagerFromApp.detach(stateManagerFromApp.getState(IntroLoadingScreen.class));
         stateManager.getState(FullUniverseExplorer.class).setEnabled(true);
+        drawHud();
+
     }
     
     @Override
@@ -75,8 +94,35 @@ public class FullUniverseExplorer extends AbstractAppState {
         super.cleanup();
     }
     
+    private void drawHud(){
+        BitmapFont myFont = assetManager.loadFont("Interface/Fonts/Ubuntu.fnt");
+        hudText = new BitmapText(myFont, false);
+        hudText.setSize(round(myFont.getCharSet().getRenderedSize() * 1.5));      // font size
+        hudText.setColor(ColorRGBA.Red);                             // font color
+        hudText.setText("0 Mega Parsecs (Mpc) away from planet Earth");
+//        hudText.setBox(new Rectangle(0, 0, cam.getWidth(), 500)); // Set box the text should center in// the text
+//        hudText.setAlignment(Align.Center);
+        hudText.setLocalTranslation((cam.getWidth())/2, hudText.getLineHeight(), 0); // position
+        guiNode.attachChild(hudText);
+    }
+    
+    private void updateDistance(float distance){
+        BigDecimal result;
+        result=round2(distance,2);
+        hudText.setText(result + " Mega Parsecs (Mpc) away from planet Earth");
+    }
+    
+    private static BigDecimal round2(float d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);       
+        return bd;
+    }
+    
     @Override
     public void update(float tpf) {
+        Vector3f cameraPos = cam.getLocation().clone();
+        float distance = (float) sqrt((cameraPos.getX() * cameraPos.getX()) + (cameraPos.getY() * cameraPos.getY()) + (cameraPos.getZ() * cameraPos.getZ()));
+        updateDistance(distance);
 //        int maxdis = 256;
 //        int vertexCount = galaxyUniverse.mesh.getVertexCount();
 //        float[] colorArray = new float[vertexCount * 4];

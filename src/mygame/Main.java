@@ -2,7 +2,6 @@ package mygame;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.renderer.RenderManager;
-import mygame.state.FullUniverseExplorer;
 import mygame.state.IntroLoadingScreen;
 
 /**
