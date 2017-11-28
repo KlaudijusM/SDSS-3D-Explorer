@@ -7,6 +7,7 @@ package mygame;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -16,8 +17,10 @@ import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 import static java.lang.Math.cos;
+import static java.lang.Math.pow;
 import static java.lang.Math.round;
 import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
 
 /**
  *
@@ -62,11 +65,23 @@ public class UniverseMesh {
 //        vertices[vertexCount] = new Vector3f(x,y,z);
 //        vertexCount++;
 //    }
-    
-    public void AddVertex(double cx, double cy, double cz, double redshift){
-        float x = (float) (getDistance(redshift) * cx), y = (float) (getDistance(redshift) * cy), z = (float) (getDistance(redshift) * cz);
+    private int test2 = 0;
+    public void AddVertex(float cx, float cy, float cz, float redshift){
+        float distance = getDistance(redshift);
+        float x,y,z;
+        if (distance == 0){
+            x = cx; y = cy; z = cz;
+        } else {
+            x = distance * cx;
+            y = distance * cy;
+            z = distance * cz;
+        }
         vertices[vertexCount] = new Vector3f(x,y,z);
         vertexCount++;
+    }
+    
+    private float getToCenter(float x, float y, float z){
+        return (float) sqrt(pow(x,2) + pow(y,2) + pow(z,2));
     }
     
     private float getDistance(double redshift){
@@ -81,8 +96,9 @@ public class UniverseMesh {
         mesh.setMode(Mesh.Mode.Points);
         mesh.updateBound();
         mesh.setStatic();
-        Material mat = new Material(aMan, "Common/MatDefs/Misc/Unshaded.j3md");
+        Material mat = new Material(aMan, "Shaders/UniverseVertex/UniverseVertex.j3md");
         mat.setColor("Color", color);
+        mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
         mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
         geom.setMaterial(mat);
         rNod.attachChild(geom);
