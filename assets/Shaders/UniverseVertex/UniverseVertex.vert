@@ -28,7 +28,8 @@ void main()
     objectDistanceToCamera = distance(objectCameraPosition,vec4(1.0, 1.0, 1.0, 1.0));
     
     if (objectDistanceToCamera < 3000.0){
-       transparency = 1.0 - (objectDistanceToCamera / 3000.0);    
+       transparency = 1.0 - (objectDistanceToCamera / 3000.0);
+       if (transparency < 0.1) { transparency = 0.1; }
     } else {
         transparency = 0.1;
     }

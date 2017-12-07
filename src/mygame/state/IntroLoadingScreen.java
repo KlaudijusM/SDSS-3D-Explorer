@@ -57,7 +57,7 @@ public class IntroLoadingScreen extends AbstractAppState {
         assetManager, inputManager, audioRenderer, guiViewPort);
         /** Create a new NiftyGUI object */
         nifty = niftyDisplay.getNifty();
-        /** Read your XML and initialize your custom ScreenController */
+        /** Read your XML and initialise your custom ScreenController */
         nifty.fromXml("Interface/LoadingScreen.xml", "start");
         // nifty.fromXml("Interface/helloworld.xml", "start", new MySettingsScreen(data));
         // attach the Nifty display to the gui view port as a processor

@@ -4,9 +4,10 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/home/klaudijus/Desktop/SDSS%20Galaxy%20Explorer/SDSS-Galaxy-Explorer/src/mygame/state/FullUniverseExplorer.java</file>
-            <file>file:/home/klaudijus/Desktop/SDSS%20Galaxy%20Explorer/SDSS-Galaxy-Explorer/assets/Shaders/UniverseVertex/UniverseVertex.frag</file>
+            <file>file:/home/klaudijus/Desktop/SDSS%20Galaxy%20Explorer/SDSS-Galaxy-Explorer/src/mygame/state/InDepthUniverseExplorer.java</file>
             <file>file:/home/klaudijus/Desktop/SDSS%20Galaxy%20Explorer/SDSS-Galaxy-Explorer/src/mygame/UniverseMesh.java</file>
-            <file>file:/home/klaudijus/Desktop/SDSS%20Galaxy%20Explorer/SDSS-Galaxy-Explorer/assets/Shaders/UniverseVertex/UniverseVertex.vert</file>
+            <file>file:/home/klaudijus/Desktop/SDSS%20Galaxy%20Explorer/SDSS-Galaxy-Explorer/assets/Shaders/CloseUniverseMesh/UniverseVertex.vert</file>
+            <file>file:/home/klaudijus/Desktop/SDSS%20Galaxy%20Explorer/SDSS-Galaxy-Explorer/src/mygame/Main.java</file>
         </group>
     </open-files>
 </project-private>
