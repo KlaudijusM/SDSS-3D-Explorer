@@ -16,7 +16,11 @@ import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
+import com.jme3.material.RenderState.BlendMode;
+import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.Camera;
@@ -25,7 +29,9 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer;
+import com.jme3.scene.shape.Quad;
 import com.jme3.scene.shape.Sphere;
+import com.jme3.texture.Texture;
 import com.jme3.util.BufferUtils;
 import de.lessvoid.nifty.Nifty;
 import static java.lang.Math.pow;
@@ -57,7 +63,7 @@ public class InDepthUniverseExplorer extends AbstractAppState {
     private Vector3f [] vertices;
     private Boolean createdGalaxies[];
     private Geometry geom[];
-    private Sphere gal = new Sphere(32, 32, 1f);
+    private Quad gal = new Quad(5,5);
     
     public InDepthUniverseExplorer (SimpleApplication app){
         rootNode = app.getRootNode();
@@ -125,11 +131,16 @@ public class InDepthUniverseExplorer extends AbstractAppState {
 
             if (distance < 1000){
                 if (createdGalaxies[i] != true){
-                    geom[i] = new Geometry("Sphere", gal);
+                    geom[i] = new Geometry("Quad", gal);
                     geom[i].setLocalTranslation(GalaxyData[i][0], GalaxyData[i][1], GalaxyData[i][2]);
+                    geom[i].setLocalRotation(new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(1,0,0)));
                     Material mat = new Material(assetManager,
                       "Common/MatDefs/Misc/Unshaded.j3md");
-                    mat.setColor("Color", ColorRGBA.Red);
+                    Texture img = assetManager.loadTexture("Textures/galaxy.png");
+//                    mat.setColor("Color", ColorRGBA.Red);
+                    mat.setTexture("ColorMap", img);
+                    mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+                    mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
                     geom[i].setMaterial(mat);
                     rootNode.attachChild(geom[i]);
                     createdGalaxies[i] = true;

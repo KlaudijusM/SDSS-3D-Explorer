@@ -1,0 +1,5 @@
+/build/
+/dist/
+galaxy_list\.csv
+
+galaxy_list_100k\.csv
