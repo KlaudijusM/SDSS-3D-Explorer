@@ -1,7 +1,25 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * The MIT License
+ *
+ * Copyright 2017 Klaudijus.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package mygame.state;
 
@@ -26,7 +44,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import static java.lang.Math.pow;
 import static java.lang.Math.round;
 import static java.lang.Math.sqrt;
 import java.math.BigDecimal;
@@ -38,6 +55,15 @@ import java.util.ArrayList;
  */
 public class FullUniverseExplorer extends AbstractAppState {
 
+    private final Integer defaultMoveSpeed = 1000; //Sets the default camera speed.
+    private final Integer defaultFrustrumFar = 999999999; //Sets the far camera frustrum
+    private final String fileName = "galaxy_list.csv";
+    
+    private KeyTrigger SpeedUpHotkey = new KeyTrigger(KeyInput.KEY_LSHIFT);
+    private KeyTrigger SlowDownHotkey = new KeyTrigger(KeyInput.KEY_LCONTROL);
+    private KeyTrigger ExtraSlowDownHotkey = new KeyTrigger(KeyInput.KEY_LMENU);
+    private KeyTrigger SwitchViewHotkey = new KeyTrigger(KeyInput.KEY_SPACE);
+    
     private final Node rootNode;
     private final Node localRootNode = new Node("Universe Explorer");
     private final AssetManager assetManager;
@@ -45,12 +71,16 @@ public class FullUniverseExplorer extends AbstractAppState {
     private final Camera cam;
     private final InputManager inputManager;
     private UniverseMesh galaxyUniverse;
-    private final AppStateManager stateManagerFromApp;
+    private final AppStateManager stateManager;
     private final Node guiNode;
     private final SimpleApplication theApp;
     private BitmapText hudText;
     private Float GalaxyData[][];
     
+    /**
+     * Constructs the application state
+     * @param app The application itself
+     */
     public FullUniverseExplorer (SimpleApplication app){
         rootNode = app.getRootNode();
         assetManager = app.getAssetManager();
@@ -58,35 +88,39 @@ public class FullUniverseExplorer extends AbstractAppState {
         guiNode = app.getGuiNode();
         cam = app.getCamera();
         inputManager = app.getInputManager();
-        stateManagerFromApp = app.getStateManager();
+        stateManager = app.getStateManager();
         theApp = app;
     }
     
+    /**
+     * Initializes the application state
+     * @param stateManager The applications State Manager.
+     * @param app The application itself.
+     */
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
         super.initialize(stateManager, app);
         
-        rootNode.attachChild(localRootNode);
+        rootNode.attachChild(localRootNode); //Attaches the local node to the root node.
+        readData(); //Reads the data from file
         
-        readData();
-        flyCam.setMoveSpeed(1000);
-        cam.setFrustumFar(999999999);
+        flyCam.setMoveSpeed(defaultMoveSpeed);
+        cam.setFrustumFar(defaultFrustrumFar);
         cam.onFrameChange();
+        
         initKeys();
-        stateManagerFromApp.detach(stateManagerFromApp.getState(IntroLoadingScreen.class));
-        stateManager.getState(FullUniverseExplorer.class).setEnabled(true);
         drawHud();
-
+        
+        stateManager.detach(stateManager.getState(IntroLoadingScreen.class));
+        stateManager.getState(FullUniverseExplorer.class).setEnabled(true);
     }
     
     @Override
     public void cleanup() {
-        rootNode.detachChild(localRootNode);
-        rootNode.detachChild(galaxyUniverse.geom);
-        galaxyUniverse.mesh = null;
-        guiNode.detachChild(hudText);
-        
         super.cleanup();
+        rootNode.detachChild(localRootNode);
+        galaxyUniverse.destroyMesh();
+        guiNode.detachChild(hudText);
         inputManager.removeListener(actionListener);
     }
     
@@ -97,13 +131,18 @@ public class FullUniverseExplorer extends AbstractAppState {
         updateDistance(distance);
     }
     
+    /**
+     * Gets the array containing data of each galaxy
+     * @return 2D float array containing data of each galaxy
+     */
     public Float[][] getPosArray(){
         return GalaxyData;
     }
     
+    /**
+     * Reads data from the main galaxy data file.
+     */
     public void readData(){
-        String fileName = "galaxy_list.csv";
-        
         String line = null;
 
         try {
@@ -114,7 +153,7 @@ public class FullUniverseExplorer extends AbstractAppState {
             
             int galaxyCount = 0;
             ArrayList<String> fileLines = new ArrayList<String>();
-            line = bufferedReader.readLine();
+            bufferedReader.readLine();
             
             while((line = bufferedReader.readLine()) != null) {
                 fileLines.add(line);
@@ -147,7 +186,7 @@ public class FullUniverseExplorer extends AbstractAppState {
                         GalaxyData[i][1] = y;
                         GalaxyData[i][2] = z;
                         GalaxyData[i][3] = 0f;
-                        galaxyUniverse.AddVertex(cx, cy, cz, redshift);
+                        galaxyUniverse.AddVertex(x, y, z);
                     } else {
                         test2++;
                         System.out.println(test2);
@@ -157,7 +196,7 @@ public class FullUniverseExplorer extends AbstractAppState {
                 }
             }
             
-            galaxyUniverse.createMesh(ColorRGBA.White);
+            galaxyUniverse.createMesh(ColorRGBA.White, "Shaders/UniverseVertex/UniverseVertex.j3md");
             
             bufferedReader.close();
         }
@@ -173,53 +212,62 @@ public class FullUniverseExplorer extends AbstractAppState {
         }
     }
     
-    private double getDistanceToCenter(float x, float y, float z){
-        return sqrt(pow(x,2) + pow(y,2) + pow(z,2));
-    }
-    
+    /**
+     * Calculates the distance based upon the redshift
+     * @param redshift The redshift of the galaxy
+     * @return The Distance
+     */
     private float getDistance(double redshift){
         float d = (float) (redshift * 299792 / 67.8);
         return d;
     }
         
+    /**
+     * Initiates keybind mappings.
+     */
     private void initKeys() {
-        inputManager.addMapping("SpeedUpTravel",  new KeyTrigger(KeyInput.KEY_LSHIFT));
-        inputManager.addMapping("SlowDownTravel",  new KeyTrigger(KeyInput.KEY_LCONTROL));
-        inputManager.addMapping("ExtraSlowDownTravel",  new KeyTrigger(KeyInput.KEY_LMENU));
-        inputManager.addMapping("ViewSwitch", new KeyTrigger(KeyInput.KEY_SPACE));
+        inputManager.addMapping("SpeedUpTravel",  SpeedUpHotkey);
+        inputManager.addMapping("SlowDownTravel",  SlowDownHotkey);
+        inputManager.addMapping("ExtraSlowDownTravel",  ExtraSlowDownHotkey);
+        inputManager.addMapping("SwitchView", SwitchViewHotkey);
         
-        inputManager.addListener(actionListener,"SpeedUpTravel", "SlowDownTravel", "ExtraSlowDownTravel", "ViewSwitch");
+        inputManager.addListener(actionListener,"SpeedUpTravel", "SlowDownTravel", "ExtraSlowDownTravel", "SwitchView");
     }
     
+    /**
+     * Adds an action listener to recieve hotkey input.
+     */
     private ActionListener actionListener = new ActionListener() {
+        @Override
         public void onAction(String name, boolean keyPressed, float tpf) {
-            if (name.equals("SpeedUpTravel")){
-                flyCam.setMoveSpeed(100000);
-                if (!keyPressed){
-                    flyCam.setMoveSpeed(1000);
-                }
-            }
-            else if (name.equals("SlowDownTravel")){
-                flyCam.setMoveSpeed(500);
-                if (!keyPressed){
-                    flyCam.setMoveSpeed(1000);
-                }
-            }
-            else if (name.equals("ExtraSlowDownTravel")){
-                flyCam.setMoveSpeed(1);
-                if (!keyPressed){
-                    flyCam.setMoveSpeed(1000);
-                }
-            }
-            else if (name.equals("ViewSwitch")){
-                flyCam.setMoveSpeed(1000);
-                cleanup();
-                stateManagerFromApp.attach(new InDepthUniverseExplorer(theApp));
-                stateManagerFromApp.getState(InDepthUniverseExplorer.class).setEnabled(false);
+            switch (name) {
+                case "SpeedUpTravel":
+                    flyCam.setMoveSpeed(defaultMoveSpeed * 10);
+                    if (!keyPressed) flyCam.setMoveSpeed(defaultMoveSpeed);
+                    break;
+                case "SlowDownTravel":
+                    flyCam.setMoveSpeed(defaultMoveSpeed / 2);
+                    if (!keyPressed) flyCam.setMoveSpeed(defaultMoveSpeed);
+                    break;
+                case "ExtraSlowDownTravel":
+                    flyCam.setMoveSpeed(1);
+                    if (!keyPressed) flyCam.setMoveSpeed(defaultMoveSpeed);
+                    break;
+                case "SwitchView":
+                    flyCam.setMoveSpeed(defaultMoveSpeed);
+                    cleanup();
+                    stateManager.attach(new InDepthUniverseExplorer(theApp));
+                    stateManager.getState(InDepthUniverseExplorer.class).setEnabled(false);
+                    break;
+                default:
+                    break;
             }
         }
     };
     
+    /**
+     * Draws text on screen to show how far is the user from Earth.
+     */
     private void drawHud(){
         BitmapFont myFont = assetManager.loadFont("Interface/Fonts/Ubuntu.fnt");
         hudText = new BitmapText(myFont, false);
@@ -230,12 +278,22 @@ public class FullUniverseExplorer extends AbstractAppState {
         guiNode.attachChild(hudText);
     }
     
+    /**
+     * Updates on screen text with distance parameter.
+     * @param distance Distance to earth from camera.
+     */
     private void updateDistance(float distance){
         BigDecimal result;
         result=round2(distance,2);
         hudText.setText(result + " Mega Parsecs (Mpc) away from planet Earth");
     }
     
+    /**
+     * Formats a float to be rounded up.
+     * @param d Float to be formatted.
+     * @param decimalPlace Number of decimal places to be formatted to.
+     * @return The formatted number.
+     */
     private static BigDecimal round2(float d, int decimalPlace) {
         BigDecimal bd = new BigDecimal(Float.toString(d));
         bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);       

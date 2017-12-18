@@ -15,6 +15,7 @@ MaterialDef Solid Color {
             WorldViewProjectionMatrix
             WorldViewMatrix
             WorldMatrix
+            ViewMatrix
         }
     }
     Technique FixedFunc {

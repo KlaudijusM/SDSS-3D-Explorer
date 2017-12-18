@@ -1,7 +1,25 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * The MIT License
+ *
+ * Copyright 2017 Klaudijus.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package mygame.state;
 
@@ -10,30 +28,19 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
-import com.jme3.audio.AudioRenderer;
-import com.jme3.font.BitmapText;
 import com.jme3.input.FlyByCamera;
-import com.jme3.input.InputManager;
 import com.jme3.material.Material;
-import com.jme3.material.RenderState;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.Camera;
-import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
-import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.shape.Quad;
-import com.jme3.scene.shape.Sphere;
 import com.jme3.texture.Texture;
-import com.jme3.util.BufferUtils;
-import de.lessvoid.nifty.Nifty;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import mygame.UniverseMesh;
@@ -44,38 +51,28 @@ import mygame.UniverseMesh;
  */
 public class InDepthUniverseExplorer extends AbstractAppState {
     
+    private final Integer spreadAmount = 1000000; //How much should the universe be scaled by
+    private final Integer defaultMoveSpeed = 200; //Sets the default camera speed.
+    private final Integer defaultFrustrumFar = 999999999; //Sets the far camera frustrum
+    
     private final Node rootNode;
     private final Node localRootNode = new Node("Universe Explorer");
     private final AssetManager assetManager;
     private final FlyByCamera flyCam;
     private final Camera cam;
-    private final InputManager inputManager;
     private UniverseMesh galaxyUniverse;
-    private final AppStateManager stateManagerFromApp;
-    private final Node guiNode;
-    private NiftyJmeDisplay niftyDisplay;
-    private final AudioRenderer audioRenderer;
-    private final ViewPort guiViewPort;
-    private final SimpleApplication theApp;
-    private Nifty nifty;
-    private BitmapText hudText;
+    private final AppStateManager stateManager;
     private Float GalaxyData[][];
-    private Vector3f [] vertices;
     private Boolean createdGalaxies[];
     private Geometry geom[];
-    private Quad gal = new Quad(5,5);
+    private Quad galaxy = new Quad(5,5);
     
     public InDepthUniverseExplorer (SimpleApplication app){
         rootNode = app.getRootNode();
         assetManager = app.getAssetManager();
         flyCam = app.getFlyByCamera();
-        guiNode = app.getGuiNode();
         cam = app.getCamera();
-        audioRenderer = app.getAudioRenderer();
-        guiViewPort = app.getGuiViewPort();
-        inputManager = app.getInputManager();
-        stateManagerFromApp = app.getStateManager();
-        theApp = app;
+        stateManager = app.getStateManager();
     }
     
     @Override
@@ -84,42 +81,31 @@ public class InDepthUniverseExplorer extends AbstractAppState {
         
         rootNode.attachChild(localRootNode);
         
-        flyCam.setMoveSpeed(100);
-        cam.setFrustumFar(999999999);
+        flyCam.setMoveSpeed(defaultMoveSpeed);
+        cam.setFrustumFar(defaultFrustrumFar);
         cam.onFrameChange();
-        GalaxyData = stateManagerFromApp.getState(FullUniverseExplorer.class).getPosArray();
+        
+        GalaxyData = stateManager.getState(FullUniverseExplorer.class).getPosArray();
         createdGalaxies = new Boolean[GalaxyData.length];
         geom = new Geometry[GalaxyData.length];
         for (int i = 0; i < GalaxyData.length; i++){
-            GalaxyData[i][0] = GalaxyData[i][0] * 1000000;
-            GalaxyData[i][1] = GalaxyData[i][1] * 1000000;
-            GalaxyData[i][2] = GalaxyData[i][2] * 1000000;
+            GalaxyData[i][0] = GalaxyData[i][0] * spreadAmount;
+            GalaxyData[i][1] = GalaxyData[i][1] * spreadAmount;
+            GalaxyData[i][2] = GalaxyData[i][2] * spreadAmount;
             createdGalaxies[i] = false;
         }
-        stateManagerFromApp.getState(FullUniverseExplorer.class).cleanup();
-        stateManagerFromApp.detach(stateManagerFromApp.getState(FullUniverseExplorer.class));
+        
+        stateManager.getState(FullUniverseExplorer.class).cleanup();
+        stateManager.detach(stateManager.getState(FullUniverseExplorer.class));
         stateManager.getState(InDepthUniverseExplorer.class).setEnabled(true);
-        vertices = new Vector3f[GalaxyData.length];
-        for (int i = 0; i < GalaxyData.length; i++){
-            vertices[i] = new Vector3f(GalaxyData[i][0], GalaxyData[i][1], GalaxyData[i][2]);
+        
+        galaxyUniverse = new UniverseMesh(rootNode, assetManager, GalaxyData.length);
+        
+        for (Float[] GalaxyData1 : GalaxyData) {
+            galaxyUniverse.AddVertex(GalaxyData1[0], GalaxyData1[1], GalaxyData1[2]);
         }
-        createMesh(ColorRGBA.White);
-    }
-    
-    public void createMesh(ColorRGBA color){
-        Mesh mesh = new Mesh();
-        mesh.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
-        mesh.updateBound();
-        Geometry geom = new Geometry("OurMesh", mesh);
-        mesh.setMode(Mesh.Mode.Points);
-        mesh.updateBound();
-        mesh.setStatic();
-        Material mat = new Material(assetManager, "Shaders/CloseUniverseMesh/UniverseVertex.j3md");
-        mat.setColor("Color", color);
-        mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
-        mat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
-        geom.setMaterial(mat);
-        rootNode.attachChild(geom);
+        
+        galaxyUniverse.createMesh(ColorRGBA.White, "Shaders/CloseUniverseMesh/UniverseVertex.j3md");
     }
     
     @Override
@@ -131,7 +117,7 @@ public class InDepthUniverseExplorer extends AbstractAppState {
 
             if (distance < 1000){
                 if (createdGalaxies[i] != true){
-                    geom[i] = new Geometry("Quad", gal);
+                    geom[i] = new Geometry("Quad", galaxy);
                     geom[i].setLocalTranslation(GalaxyData[i][0], GalaxyData[i][1], GalaxyData[i][2]);
                     geom[i].setLocalRotation(new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(1,0,0)));
                     Material mat = new Material(assetManager,
@@ -155,6 +141,7 @@ public class InDepthUniverseExplorer extends AbstractAppState {
     @Override
     public void cleanup() {
         super.cleanup();
+        galaxyUniverse.destroyMesh();
     }
     
 }

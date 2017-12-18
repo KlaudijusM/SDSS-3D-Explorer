@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <nifty xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://nifty-gui.lessvoid.com/nifty-gui" xsi:schemaLocation="https://raw.githubusercontent.com/void256/nifty-gui/1.4/nifty-core/src/main/resources/nifty.xsd https://raw.githubusercontent.com/void256/nifty-gui/1.4/nifty-core/src/main/resources/nifty.xsd">
-    <screen id="start" controller="mygame.Main">
+    <screen id="start" controller="mygame.state.IntroLoadingScreen">
         <layer id="imageLayer" childLayout="center" backgroundColor="#000">
             <image id="SDSSLogo" filename="/Interface/sdsslogo.png" width="605px" x="-1px" y="-1px" height="187px"/>
         </layer>
         <layer id="textLayer" childLayout="absolute" align="center">
-            <text text="Loading..." width="100%" height="50px" font="Interface/Fonts/Default.fnt" x="0" y="80%" />
+            <text id="progressText" text="Loading..." width="100%" height="50px" font="Interface/Fonts/Default.fnt" x="0" y="80%" />
         </layer>
     </screen>
 </nifty>
