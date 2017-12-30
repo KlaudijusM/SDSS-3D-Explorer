@@ -160,7 +160,7 @@ public class FullUniverseExplorer extends AbstractAppState {
                 galaxyCount++;
             }
             
-            GalaxyData = new Float[galaxyCount][4];
+            GalaxyData = new Float[galaxyCount][6];
             
             galaxyUniverse = new UniverseMesh(rootNode, assetManager, galaxyCount);
             int test2 = 0;
@@ -171,6 +171,8 @@ public class FullUniverseExplorer extends AbstractAppState {
                     float cy = Float.parseFloat(parts[2]);
                     float cz = Float.parseFloat(parts[3]);
                     float redshift = Float.parseFloat(parts[4]);
+                    float ra = Float.parseFloat(parts[5]);
+                    float dec = Float.parseFloat(parts[6]);
                     float x,y,z;
                     if (redshift == 0){
                         x = cx; y = cy; z = cz;
@@ -185,7 +187,9 @@ public class FullUniverseExplorer extends AbstractAppState {
                         GalaxyData[i][0] = x;
                         GalaxyData[i][1] = y;
                         GalaxyData[i][2] = z;
-                        GalaxyData[i][3] = 0f;
+                        GalaxyData[i][3] = redshift;
+                        GalaxyData[i][4] = ra;
+                        GalaxyData[i][5] = dec;
                         galaxyUniverse.AddVertex(x, y, z);
                     } else {
                         test2++;

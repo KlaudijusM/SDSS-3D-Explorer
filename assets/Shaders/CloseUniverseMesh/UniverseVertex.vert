@@ -32,7 +32,7 @@ void main()
 
     v_color = vec4(1.0, 1.0, 1.0, transparency);
 
-    if (objectDistanceToCamera < 50000.0 && objectDistanceToCamera > 1000.0){
+    if (objectDistanceToCamera < 50000.0 && objectDistanceToCamera > 2000.0){
         gl_Position = g_WorldViewProjectionMatrix * vec4(inPosition, 1.0);
     }
 }

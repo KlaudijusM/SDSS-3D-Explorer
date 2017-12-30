@@ -40,9 +40,21 @@ import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
+import com.jme3.texture.Image;
 import com.jme3.texture.Texture;
+import com.jme3.texture.Texture2D;
+import com.jme3.texture.Texture3D;
+import com.jme3.texture.plugins.AWTLoader;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import mygame.UniverseMesh;
 
 /**
@@ -51,7 +63,7 @@ import mygame.UniverseMesh;
  */
 public class InDepthUniverseExplorer extends AbstractAppState {
     
-    private final Integer spreadAmount = 1000000; //How much should the universe be scaled by
+    private final Integer spreadAmount = 10000; //How much should the universe be scaled by
     private final Integer defaultMoveSpeed = 200; //Sets the default camera speed.
     private final Integer defaultFrustrumFar = 999999999; //Sets the far camera frustrum
     
@@ -64,6 +76,7 @@ public class InDepthUniverseExplorer extends AbstractAppState {
     private final AppStateManager stateManager;
     private Float GalaxyData[][];
     private Boolean createdGalaxies[];
+    private BufferedImage createdGalaxiesImages[];
     private Geometry geom[];
     private Quad galaxy = new Quad(5,5);
     
@@ -87,6 +100,7 @@ public class InDepthUniverseExplorer extends AbstractAppState {
         
         GalaxyData = stateManager.getState(FullUniverseExplorer.class).getPosArray();
         createdGalaxies = new Boolean[GalaxyData.length];
+        createdGalaxiesImages = new BufferedImage[GalaxyData.length]; 
         geom = new Geometry[GalaxyData.length];
         for (int i = 0; i < GalaxyData.length; i++){
             GalaxyData[i][0] = GalaxyData[i][0] * spreadAmount;
@@ -115,16 +129,27 @@ public class InDepthUniverseExplorer extends AbstractAppState {
         for (int i = 0; i < GalaxyData.length; i++){
             float distance = (float) sqrt(pow(GalaxyData[i][0] - cameraPos.x,2) + pow(GalaxyData[i][1] - cameraPos.y, 2) + pow(GalaxyData[i][2] - cameraPos.z,2));
 
-            if (distance < 1000){
+            if (distance < 2000){
                 if (createdGalaxies[i] != true){
                     geom[i] = new Geometry("Quad", galaxy);
                     geom[i].setLocalTranslation(GalaxyData[i][0], GalaxyData[i][1], GalaxyData[i][2]);
                     geom[i].setLocalRotation(new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(1,0,0)));
                     Material mat = new Material(assetManager,
                       "Common/MatDefs/Misc/Unshaded.j3md");
-                    Texture img = assetManager.loadTexture("Textures/galaxy.png");
+                    
+                    URL imgUrl = getGalaxyImgUrl(GalaxyData[i][4], GalaxyData[i][5]);
+                    try {
+                        createdGalaxiesImages[i] = ImageIO.read(imgUrl);
+                    } catch (IOException ex) {
+                        Logger.getLogger(InDepthUniverseExplorer.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
+                    AWTLoader loader = new AWTLoader();
+                    Image load = loader.load(createdGalaxiesImages[i], false);
+                    Texture2D texture1 = new Texture2D(load) {};
+
 //                    mat.setColor("Color", ColorRGBA.Red);
-                    mat.setTexture("ColorMap", img);
+                    mat.setTexture("ColorMap", texture1);
                     mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
                     mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
                     geom[i].setMaterial(mat);
@@ -133,6 +158,7 @@ public class InDepthUniverseExplorer extends AbstractAppState {
                 }
             } else if (createdGalaxies[i]){
                 createdGalaxies[i] = false;
+                createdGalaxiesImages[i] = null;
                 rootNode.detachChild(geom[i]);
             }
         }        
@@ -142,6 +168,16 @@ public class InDepthUniverseExplorer extends AbstractAppState {
     public void cleanup() {
         super.cleanup();
         galaxyUniverse.destroyMesh();
+    }
+    
+    public URL getGalaxyImgUrl(float ra, float dec){
+        URL url = null;
+        try {
+            url = new URL("http://skyserver.sdss.org/dr14/SkyServerWS/ImgCutout/getjpeg?TaskName=Skyserver.Chart.ShowNearest&ra=" + ra + "&dec=" + dec + "&scale=0.1");
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(InDepthUniverseExplorer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return url;
     }
     
 }
