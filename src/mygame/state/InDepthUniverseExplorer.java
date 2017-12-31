@@ -129,11 +129,12 @@ public class InDepthUniverseExplorer extends AbstractAppState {
         for (int i = 0; i < GalaxyData.length; i++){
             float distance = (float) sqrt(pow(GalaxyData[i][0] - cameraPos.x,2) + pow(GalaxyData[i][1] - cameraPos.y, 2) + pow(GalaxyData[i][2] - cameraPos.z,2));
 
-            if (distance < 2000){
+            if (distance < 500){
                 if (createdGalaxies[i] != true){
                     geom[i] = new Geometry("Quad", galaxy);
                     geom[i].setLocalTranslation(GalaxyData[i][0], GalaxyData[i][1], GalaxyData[i][2]);
                     geom[i].setLocalRotation(new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(1,0,0)));
+                    geom[i].lookAt(new Vector3f(0f, 0f, 0f), new Vector3f(0f, 0f, 0f));
                     Material mat = new Material(assetManager,
                       "Common/MatDefs/Misc/Unshaded.j3md");
                     
@@ -173,7 +174,7 @@ public class InDepthUniverseExplorer extends AbstractAppState {
     public URL getGalaxyImgUrl(float ra, float dec){
         URL url = null;
         try {
-            url = new URL("http://skyserver.sdss.org/dr14/SkyServerWS/ImgCutout/getjpeg?TaskName=Skyserver.Chart.ShowNearest&ra=" + ra + "&dec=" + dec + "&scale=0.1");
+            url = new URL("http://skyserver.sdss.org/dr14/SkyServerWS/ImgCutout/getjpeg?TaskName=Skyserver.Chart.ShowNearest&ra=" + ra + "&dec=" + dec + "&scale=0.5");
         } catch (MalformedURLException ex) {
             Logger.getLogger(InDepthUniverseExplorer.class.getName()).log(Level.SEVERE, null, ex);
         }
