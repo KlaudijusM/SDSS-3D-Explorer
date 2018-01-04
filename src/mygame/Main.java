@@ -24,6 +24,11 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.system.AppSettings;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import mygame.state.IntroLoadingScreen;
 
 /**
@@ -32,14 +37,21 @@ import mygame.state.IntroLoadingScreen;
  * @author normenhansen
  */
 public class Main extends SimpleApplication {
-
-    public static void main(String[] args) {
+    
+    public static void main(String[] args) throws IOException {
+        AppSettings settings = new AppSettings(true);
+        settings.setTitle("SDSS Galaxy Explorer");
+        settings.setFrameRate(-1);
+        settings.setIcons(new BufferedImage[]{ImageIO.read(new File("assets/Interface/sdsslogo.png"))});
+        settings.setSettingsDialogImage("Interface/sdsslogo.png");
         Main app = new Main();
+        app.setSettings(settings);
         app.start();
     }
     
     @Override
     public void simpleInitApp() {
+
         stateManager.attach(new IntroLoadingScreen(this));
     }
 }

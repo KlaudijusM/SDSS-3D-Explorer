@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<nifty xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://nifty-gui.lessvoid.com/nifty-gui" xsi:schemaLocation="https://raw.githubusercontent.com/void256/nifty-gui/1.4/nifty-core/src/main/resources/nifty.xsd https://raw.githubusercontent.com/void256/nifty-gui/1.4/nifty-core/src/main/resources/nifty.xsd">
+    <useControls filename="nifty-default-controls.xml"/>
+    <useStyles filename="nifty-default-styles.xml"/>
+    <screen id="start" controller="mygame.state.MainMenu">
+        <layer id="buttons" childLayout="absolute" backgroundImage="/Interface/galaxy.jpg">
+            <panel id="buttonsPanel" childLayout="absolute" width="100%" height="100%">
+                <control name="button" id="startButton" visibleToMouse="true" width="20%" x="1%" y="78%" label="Start" align="left" height="5%">
+                    <interact onClick="startExploration()"/>
+                </control>
+                <control name="button" id="optionsButton" visibleToMouse="true" width="20%" x="1%" y="84%" label="Options" align="left" height="5%">
+                    <interact onClick=""/>
+                </control>
+                <control name="button" id="exitButton" visibleToMouse="true" width="20%" x="1%" y="90%" label="Exit" align="left" height="5%">
+                    <interact onClick="exitExploration()"/>
+                </control>
+            </panel>
+        </layer>
+    </screen>
+</nifty>

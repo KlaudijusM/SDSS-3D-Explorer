@@ -104,15 +104,8 @@ public class FullUniverseExplorer extends AbstractAppState {
         rootNode.attachChild(localRootNode); //Attaches the local node to the root node.
         readData(); //Reads the data from file
         
-        flyCam.setMoveSpeed(defaultMoveSpeed);
-        cam.setFrustumFar(defaultFrustrumFar);
-        cam.onFrameChange();
-        
-        initKeys();
-        drawHud();
-        
         stateManager.detach(stateManager.getState(IntroLoadingScreen.class));
-        stateManager.getState(FullUniverseExplorer.class).setEnabled(true);
+        stateManager.attach(new MainMenu(theApp));
     }
     
     @Override
@@ -120,7 +113,9 @@ public class FullUniverseExplorer extends AbstractAppState {
         super.cleanup();
         rootNode.detachChild(localRootNode);
         galaxyUniverse.destroyMesh();
-        guiNode.detachChild(hudText);
+        if (hudText != null){
+            guiNode.detachChild(hudText);  
+        }
         inputManager.removeListener(actionListener);
     }
     
@@ -200,8 +195,6 @@ public class FullUniverseExplorer extends AbstractAppState {
                 }
             }
             
-            galaxyUniverse.createMesh(ColorRGBA.White, "Shaders/UniverseVertex/UniverseVertex.j3md");
-            
             bufferedReader.close();
         }
         catch(FileNotFoundException ex) {
@@ -224,6 +217,18 @@ public class FullUniverseExplorer extends AbstractAppState {
     private float getDistance(double redshift){
         float d = (float) (redshift * 299792 / 67.8);
         return d;
+    }
+    
+    public void initGalaxy(){
+        flyCam.setMoveSpeed(defaultMoveSpeed);
+        cam.setFrustumFar(defaultFrustrumFar);
+        cam.onFrameChange();
+        
+        initKeys();
+        drawHud();
+        flyCam.setDragToRotate(false);
+        galaxyUniverse.createMesh(ColorRGBA.White, "Shaders/UniverseVertex/UniverseVertex.j3md");
+        stateManager.getState(FullUniverseExplorer.class).setEnabled(true);
     }
         
     /**
