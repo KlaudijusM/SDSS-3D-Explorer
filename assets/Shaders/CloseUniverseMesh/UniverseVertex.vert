@@ -23,12 +23,7 @@ void main()
     objectCameraPosition = g_WorldViewMatrix * vec4(inPosition, 1.0);
     objectDistanceToCamera = distance(objectCameraPosition,vec4(1.0, 1.0, 1.0, 1.0));
     
-    if (objectDistanceToCamera < 3000.0){
-       transparency = 1.0 - (objectDistanceToCamera / 3000.0);
-       if (transparency < 0.2) { transparency = 0.2; }
-    } else {
-        transparency = 0.2;
-    }
+    transparency = 1.0 - (objectDistanceToCamera / 1000000.0);
 
     v_color = vec4(1.0, 1.0, 1.0, transparency);
 

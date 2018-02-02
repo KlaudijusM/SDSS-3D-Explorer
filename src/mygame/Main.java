@@ -42,10 +42,13 @@ public class Main extends SimpleApplication {
         AppSettings settings = new AppSettings(true);
         settings.setTitle("SDSS Galaxy Explorer");
         settings.setFrameRate(-1);
-        settings.setIcons(new BufferedImage[]{ImageIO.read(new File("assets/Interface/sdsslogo.png"))});
+        //settings.setIcons(new BufferedImage[]{ImageIO.read(new File("assets/Interface/sdsslogo.png"))});
         settings.setSettingsDialogImage("Interface/sdsslogo.png");
         Main app = new Main();
+        
         app.setSettings(settings);
+        app.setDisplayStatView(false);
+        app.setDisplayFps(false);
         app.start();
     }
     

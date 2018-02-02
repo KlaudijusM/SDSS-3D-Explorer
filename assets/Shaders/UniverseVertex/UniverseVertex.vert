@@ -37,9 +37,9 @@ void main()
     v_color = vec4(1.0, 1.0, 1.0, transparency);
 
     if (cameraDistanceToCenter > 300.0) {
-        if (objectDistanceToCenter > 10.0) {
+        //if (objectDistanceToCenter > 10.0) {
             gl_Position = g_WorldViewProjectionMatrix * vec4(inPosition, 1.0);
-        } else {}
+        //} else {gl_Position = g_WorldViewProjectionMatrix * vec4(inPosition, 1.0);}
     } else {
         gl_Position = g_WorldViewProjectionMatrix * vec4(inPosition, 1.0);
     }

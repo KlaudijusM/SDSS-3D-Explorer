@@ -55,14 +55,16 @@ import java.util.ArrayList;
  */
 public class FullUniverseExplorer extends AbstractAppState {
 
-    private final Integer defaultMoveSpeed = 1000; //Sets the default camera speed.
+    public Integer defaultMoveSpeed = 1000; //Sets the default camera speed.
+    public Float quickTravelMultiplier = 10f;
+    public Float slowTravelMultiplier = 0.5f;
     private final Integer defaultFrustrumFar = 999999999; //Sets the far camera frustrum
     private final String fileName = "galaxy_list.csv";
     
-    private KeyTrigger SpeedUpHotkey = new KeyTrigger(KeyInput.KEY_LSHIFT);
-    private KeyTrigger SlowDownHotkey = new KeyTrigger(KeyInput.KEY_LCONTROL);
-    private KeyTrigger ExtraSlowDownHotkey = new KeyTrigger(KeyInput.KEY_LMENU);
-    private KeyTrigger SwitchViewHotkey = new KeyTrigger(KeyInput.KEY_SPACE);
+    public KeyTrigger SpeedUpHotkey = new KeyTrigger(KeyInput.KEY_LSHIFT);
+    public KeyTrigger SlowDownHotkey = new KeyTrigger(KeyInput.KEY_LCONTROL);
+    public KeyTrigger ExtraSlowDownHotkey = new KeyTrigger(KeyInput.KEY_LMENU);
+    public KeyTrigger SwitchViewHotkey = new KeyTrigger(KeyInput.KEY_SPACE);
     
     private final Node rootNode;
     private final Node localRootNode = new Node("Universe Explorer");
@@ -106,6 +108,16 @@ public class FullUniverseExplorer extends AbstractAppState {
         
         stateManager.detach(stateManager.getState(IntroLoadingScreen.class));
         stateManager.attach(new MainMenu(theApp));
+    }
+    
+    public void setOptions(int tSpeed, float qTravelMult, float sTravelMult, int a, int b, int c, int d){
+        defaultMoveSpeed = tSpeed;
+        quickTravelMultiplier = qTravelMult;
+        slowTravelMultiplier = sTravelMult;
+        SpeedUpHotkey = new KeyTrigger(a);
+        SlowDownHotkey = new KeyTrigger(b);
+        ExtraSlowDownHotkey = new KeyTrigger(c);
+        SwitchViewHotkey = new KeyTrigger(d);
     }
     
     @Override
@@ -228,6 +240,7 @@ public class FullUniverseExplorer extends AbstractAppState {
         drawHud();
         flyCam.setDragToRotate(false);
         galaxyUniverse.createMesh(ColorRGBA.White, "Shaders/UniverseVertex/UniverseVertex.j3md");
+        cam.setLocation(new Vector3f(0, 0, 5000));
         stateManager.getState(FullUniverseExplorer.class).setEnabled(true);
     }
         
@@ -251,11 +264,11 @@ public class FullUniverseExplorer extends AbstractAppState {
         public void onAction(String name, boolean keyPressed, float tpf) {
             switch (name) {
                 case "SpeedUpTravel":
-                    flyCam.setMoveSpeed(defaultMoveSpeed * 10);
+                    flyCam.setMoveSpeed((float) (defaultMoveSpeed * quickTravelMultiplier));
                     if (!keyPressed) flyCam.setMoveSpeed(defaultMoveSpeed);
                     break;
                 case "SlowDownTravel":
-                    flyCam.setMoveSpeed(defaultMoveSpeed / 2);
+                    flyCam.setMoveSpeed((float) (defaultMoveSpeed * slowTravelMultiplier));
                     if (!keyPressed) flyCam.setMoveSpeed(defaultMoveSpeed);
                     break;
                 case "ExtraSlowDownTravel":
