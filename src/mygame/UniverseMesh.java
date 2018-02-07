@@ -90,7 +90,7 @@ public class UniverseMesh {
         mesh.updateBound();
         geom = new Geometry("OurMesh", mesh);
         mesh.setMode(Mesh.Mode.Points);
-        mesh.updateBound();
+        mesh.updateBound(); 
         mesh.setStatic();
         Material mat = new Material(assetManager, shaderLocation);
         mat.setColor("Color", color);
